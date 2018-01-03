@@ -1,0 +1,1094 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+using System.Windows.Forms;
+using System.IO;
+using System.Drawing;
+using System.Runtime.InteropServices;
+using System.Threading;
+
+namespace Testsoft
+{
+    public partial class Form1 : Form
+    {
+        public ClassCompor myCOM = new ClassCompor();
+        public System.IO.Stream myCOMPortStream;
+        public static byte FrameLen;
+        public byte channel_select_PT = 1;
+        public byte channel_select_TC = 1;
+        public byte TC_temperature_side = 0;
+        public byte unrespond_cmd = 0;
+        byte[] RXBUFbytearray = new byte[20];
+
+        public string DataText = "";
+        public int Rxcount = 0;
+
+        public void softinitial()    //初始化软件刚打开时界面要加载的值
+        {
+            comboBoxPort.Text = "COM1";
+            comboBoxBaud.Text = "115200";
+            comboBoxVerify.Text = "NONE";
+            comboBoxData.Text = "8";
+            comboBoxStop.Text = "1";
+            buttonOpenCOM.BackColor = Color.LightBlue;
+            radioButton1.Checked = true;
+            groupBox2.Enabled = false;
+            groupBox3.Enabled = false;
+            radioButton9.Checked = true;
+            radioButton17.Visible = false;
+            radioButton16.Visible = false;
+            radioButton15.Visible = false;
+            radioButton14.Visible = false;
+            radioButton13.Visible = false;
+            radioButton12.Visible = false;
+            radioButton11.Visible = false;
+        }
+
+        //初使化并打开端口,add in v1.83
+        public bool iniCOM()
+        {
+            if (myCOM.IsOpen == true)
+            {
+                try
+                {
+                    myCOMPortStream.Close();
+                }
+                catch
+                {
+                    return (false);
+                }
+                try
+                {
+                    myCOM.Close();
+                }
+                catch
+                {
+                    return (false);
+                }
+                return (false);
+            }
+            else
+            {
+                if (myCOM.PortName != comboBoxPort.Text)
+                {
+                    myCOM.PortName = comboBoxPort.Text;
+                }
+                //波特率设置
+                myCOM.BaudRate = Convert.ToInt32(comboBoxBaud.Text);
+                //数据位设置
+                myCOM.DataBits = Convert.ToInt32(comboBoxData.Text);
+                //停止位设置
+                if (comboBoxStop.Text == "1")
+                {
+                    myCOM.StopBits = System.IO.Ports.StopBits.One;
+                }
+                else if (comboBoxStop.Text == "1.5")
+                {
+                    myCOM.StopBits = System.IO.Ports.StopBits.OnePointFive;
+                }
+                else if (comboBoxStop.Text == "2")
+                {
+                    myCOM.StopBits = System.IO.Ports.StopBits.Two;
+                }
+                //设置奇偶校验协议
+                if (comboBoxVerify.Text == "NONE")
+                {
+                    myCOM.Parity = System.IO.Ports.Parity.None; ;
+                }
+                else if (comboBoxVerify.Text == "ODD")
+                {
+                    myCOM.Parity = System.IO.Ports.Parity.Odd;
+                }
+                else if (comboBoxVerify.Text == "EVEN")
+                {
+                    myCOM.Parity = System.IO.Ports.Parity.Even;
+                }
+                else if (comboBoxVerify.Text == "MARK")
+                {
+                    myCOM.Parity = System.IO.Ports.Parity.Mark;
+                }
+                else if (comboBoxVerify.Text == "SPACE")
+                {
+                    myCOM.Parity = System.IO.Ports.Parity.Space;
+                }
+
+                myCOM.DtrEnable = true;     //mod in v3.22
+                myCOM.RtsEnable = true;    //mod in v3.22
+
+                myCOM.DataReceived += DataReceived;
+
+                try
+                {
+                    myCOM.Open();
+                    myCOMPortStream = myCOM.BaseStream;
+                }
+                catch
+                {
+                    MessageBoxERRwarning(4);
+                    return (false);
+                }
+                return (true);
+            }
+        }
+
+        private void DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)       //接收数据的原始函数
+        {
+            int i;
+            byte rxbyte;
+            //读取数据
+            try
+            {
+                i = myCOM.BytesToRead;
+            }
+            catch
+            {
+                return;
+            }
+            byte[] RXBUFbytearray = new byte[Rxcount];
+
+            while (0 != i)
+            {
+                try
+                {
+                    rxbyte = (byte)myCOM.ReadByte();
+                    i--;
+                }
+                catch
+                {
+                    return;
+                }
+                ReceiveFrameAnalysis(ref rxbyte);      //解析接收到的数据
+            }
+        }
+
+        public void ReceiveFrameAnalysis(ref byte rxbyte)
+        {
+            int bytenumber = 0;
+            if (unrespond_cmd == 0)
+            {
+                return;
+            }
+            if ((unrespond_cmd != 4) && (unrespond_cmd != 8))
+            {
+                if ((rxbyte == 0x06) && (0 == Rxcount))
+                {
+                    RXBUFbytearray[0] = rxbyte;
+                    bytenumber = 1;
+                    unrespond_cmd = 0;
+                    DisplayRXData(bytenumber, RXBUFbytearray);
+                    return;
+                }
+                else
+                {
+                    return;
+                }
+            }
+            //接收帧头
+            if (0 == Rxcount)
+            {
+                if (rxbyte == 0x00)
+                {
+                    RXBUFbytearray[Rxcount] = rxbyte;
+                    Rxcount++;
+                }
+                else
+                {
+                    return;
+                }
+            }
+            else if (1 == Rxcount)
+            {
+                if (rxbyte == 0x14)
+                {
+                    RXBUFbytearray[Rxcount] = rxbyte;
+                    Rxcount++;
+                }
+                else
+                {
+                    return;
+                }
+            }
+            //接收数据信息和校验和
+            else
+            {
+                RXBUFbytearray[Rxcount] = rxbyte;
+                Rxcount++;
+                if (Rxcount == 19)
+                {
+                    bytenumber = Rxcount + 1;
+                    Rxcount = 0;
+                    double getvalue = 0;
+                    if (unrespond_cmd == 4)
+                    {
+                        unrespond_cmd = 0;
+                        getvalue = (double)((short)(RXBUFbytearray[2] << 8 | RXBUFbytearray[3])) / 10;
+                        textBox25.Text = getvalue.ToString();
+                        getvalue = (double)((short)(RXBUFbytearray[4] << 8 | RXBUFbytearray[5])) / 10;
+                        textBox24.Text = getvalue.ToString();
+                        getvalue = (double)((short)(RXBUFbytearray[6] << 8 | RXBUFbytearray[7])) / 10;
+                        textBox23.Text = getvalue.ToString();
+                        getvalue = (double)((short)(RXBUFbytearray[8] << 8 | RXBUFbytearray[9])) / 10;
+                        textBox22.Text = getvalue.ToString();
+                        getvalue = (double)((short)(RXBUFbytearray[10] << 8 | RXBUFbytearray[11])) / 10;
+                        textBox21.Text = getvalue.ToString();
+                        getvalue = (double)((short)(RXBUFbytearray[12] << 8 | RXBUFbytearray[13])) / 10;
+                        textBox20.Text = getvalue.ToString();
+                        getvalue = (double)((short)(RXBUFbytearray[14] << 8 | RXBUFbytearray[15])) / 10;
+                        textBox19.Text = getvalue.ToString();
+                        getvalue = (double)((short)(RXBUFbytearray[16] << 8 | RXBUFbytearray[17])) / 10;
+                        textBox18.Text = getvalue.ToString();
+                    }
+                    else if (unrespond_cmd == 8)
+                    {
+                        unrespond_cmd = 0;
+                        getvalue = (double)((short)(RXBUFbytearray[2] << 8 | RXBUFbytearray[3])) / 10;
+                        textBox58.Text = getvalue.ToString();
+                        getvalue = (double)((short)(RXBUFbytearray[4] << 8 | RXBUFbytearray[5])) / 10;
+                        textBox57.Text = getvalue.ToString();
+                        getvalue = (double)((short)(RXBUFbytearray[6] << 8 | RXBUFbytearray[7])) / 10;
+                        textBox56.Text = getvalue.ToString();
+                        getvalue = (double)((short)(RXBUFbytearray[8] << 8 | RXBUFbytearray[9])) / 10;
+                        textBox55.Text = getvalue.ToString();
+                        getvalue = (double)((short)(RXBUFbytearray[10] << 8 | RXBUFbytearray[11])) / 10;
+                        textBox54.Text = getvalue.ToString();
+                        getvalue = (double)((short)(RXBUFbytearray[12] << 8 | RXBUFbytearray[13])) / 10;
+                        textBox53.Text = getvalue.ToString();
+                        getvalue = (double)((short)(RXBUFbytearray[14] << 8 | RXBUFbytearray[15])) / 10;
+                        textBox52.Text = getvalue.ToString();
+                        getvalue = (double)((short)(RXBUFbytearray[16] << 8 | RXBUFbytearray[17])) / 10;
+                        textBox51.Text = getvalue.ToString();
+                    }
+                    DisplayRXData(bytenumber, RXBUFbytearray);
+                }
+            }
+        }
+
+        public void DisplayRXData(int bytenumber, byte[] RXBUFbytearray)           //显示接收数据
+        {
+            byte i;
+            string temps = "";
+            for (i = 0; i < bytenumber; i++)
+            {
+                temps += RXBUFbytearray[i].ToString("X2") + " ";
+            }
+            richTextBoxDataRecieve.Text = "\r\n" + richTextBoxDataRecieve.Text;
+            richTextBoxDataRecieve.Text = temps + "\r\n" + richTextBoxDataRecieve.Text;    //本次接收的数据
+        }
+
+        public static void MessageBoxERRwarning(int ERRnumber)
+        {
+            if (ERRnumber == 1)
+            {
+                MessageBox.Show("串口未打开，请检查串口连接");
+            }
+            else if (ERRnumber == 2)
+            {
+                MessageBox.Show("数据发送失败，请检查串口连接");
+            }
+            else if (ERRnumber == 3)
+            {
+                MessageBox.Show("请输入正确的值");
+            }
+            else if (ERRnumber == 4)
+            {
+                MessageBox.Show("串口打开失败，请检查端口是否存在或占用");
+            }
+            else if (ERRnumber == 5)
+            {
+                MessageBox.Show("请先选择冷端模式");
+            }
+        }
+
+        public void PrepareData()       //准备要发送的数据并发送
+        {
+
+        }
+
+        public void SendData_New(byte[] TXBUFbytearray, byte offset, int totallen)      //发送数据的原始函数
+        {
+            int i = 0;
+            string temps = "";
+
+            if (myCOM.IsOpen == true)
+            {
+                try
+                {
+                    myCOM.Write(TXBUFbytearray, offset, totallen);
+                    for (i = 0; i < totallen; i++)          //把要发送的数据转换成字符串
+                    {
+                        temps += TXBUFbytearray[i].ToString("X2") + " ";
+                    }
+                    richTextBoxDataSend.Text = "\r\n" + richTextBoxDataSend.Text;
+                    richTextBoxDataSend.Text = temps + "\r\n" + richTextBoxDataSend.Text;    //本次发送的数据
+                }
+                catch
+                {
+                    try
+                    {
+                        myCOMPortStream.Close();
+                    }
+                    catch
+                    {
+                        ;
+                    }
+                    try
+                    {
+                        myCOM.Close();
+                    }
+                    catch
+                    {
+                        ;
+                    }
+                    MessageBoxERRwarning(2);
+                }
+            }
+            else
+            {
+                MessageBoxERRwarning(1);
+            }
+        }
+
+        public void PrepareData_New1()       //准备要发送的数据并发送
+        {
+            byte totallen = 0;
+            byte[] TXBUFbytearray;
+            uint crc = 0;
+            unrespond_cmd = 1;
+            totallen = 6;
+            TXBUFbytearray = new byte[6];
+            TXBUFbytearray[0] = 0x01;
+            TXBUFbytearray[1] = 0x01;
+            TXBUFbytearray[2] = 0x06;
+            TXBUFbytearray[3] = 0x0B;
+            crc = GetCRC(TXBUFbytearray, (byte)(totallen - 2));
+            TXBUFbytearray[4] = (byte)crc;
+            TXBUFbytearray[5] = (byte)(crc >> 8);
+
+            SendData_New(TXBUFbytearray, 0, totallen);
+        }
+
+        public void PrepareData_New2()       //准备要发送的数据并发送
+        {
+            byte totallen = 0;
+            byte[] TXBUFbytearray;
+            uint crc = 0;
+            short value;
+            unrespond_cmd = 2;
+            totallen = 9;
+            TXBUFbytearray = new byte[9];
+            TXBUFbytearray[0] = 0x01;
+            TXBUFbytearray[1] = 0x03;
+            TXBUFbytearray[2] = 0x09;
+            TXBUFbytearray[3] = 0x01;
+            TXBUFbytearray[4] = channel_select_PT;
+            switch (channel_select_PT)
+            {
+                case 1:
+                    try
+                    {
+                        value = (short)(Convert.ToDouble(textBox1.Text) * 100);
+                    }
+                    catch
+                    {
+                        MessageBoxERRwarning(3);
+                        return;
+                    }
+                    break;
+                case 2:
+                    try
+                    {
+                        value = (short)(Convert.ToDouble(textBox2.Text) * 100);
+                    }
+                    catch
+                    {
+                        MessageBoxERRwarning(3);
+                        return;
+                    }
+                    break;
+                case 3:
+                    try
+                    {
+                        value = (short)(Convert.ToDouble(textBox3.Text) * 100);
+                    }
+                    catch
+                    {
+                        MessageBoxERRwarning(3);
+                        return;
+                    }
+                    break;
+                case 4:
+                    try
+                    {
+                        value = (short)(Convert.ToDouble(textBox4.Text) * 100);
+                    }
+                    catch
+                    {
+                        MessageBoxERRwarning(3);
+                        return;
+                    }
+                    break;
+                case 5:
+                    try
+                    {
+                        value = (short)(Convert.ToDouble(textBox5.Text) * 100);
+                    }
+                    catch
+                    {
+                        MessageBoxERRwarning(3);
+                        return;
+                    }
+                    break;
+                case 6:
+                    try
+                    {
+                        value = (short)(Convert.ToDouble(textBox6.Text) * 100);
+                    }
+                    catch
+                    {
+                        MessageBoxERRwarning(3);
+                        return;
+                    }
+                    break;
+                case 7:
+                    try
+                    {
+                        value = (short)(Convert.ToDouble(textBox7.Text) * 100);
+                    }
+                    catch
+                    {
+                        MessageBoxERRwarning(3);
+                        return;
+                    }
+                    break;
+                case 8:
+                    try
+                    {
+                        value = (short)(Convert.ToDouble(textBox8.Text) * 100);
+                    }
+                    catch
+                    {
+                        MessageBoxERRwarning(3);
+                        return;
+                    }
+                    break;
+                default:
+                    return;
+            }
+            TXBUFbytearray[5] = (byte)(value >> 8);
+            TXBUFbytearray[6] = (byte)value;
+            crc = GetCRC(TXBUFbytearray, (byte)(totallen - 2));
+            TXBUFbytearray[7] = (byte)crc;
+            TXBUFbytearray[8] = (byte)(crc >> 8);
+
+            SendData_New(TXBUFbytearray, 0, totallen);
+        }
+
+        public void PrepareData_New3()       //准备要发送的数据并发送
+        {
+            byte totallen = 0;
+            byte[] TXBUFbytearray;
+            uint crc = 0;
+            short value;
+            unrespond_cmd = 3;
+            totallen = 9;
+            TXBUFbytearray = new byte[9];
+            TXBUFbytearray[0] = 0x01;
+            TXBUFbytearray[1] = 0x03;
+            TXBUFbytearray[2] = 0x09;
+            TXBUFbytearray[3] = 0x01;
+            TXBUFbytearray[4] = channel_select_PT;
+            switch (channel_select_PT)
+            {
+                case 1:
+                    try
+                    {
+                        value = (short)(Convert.ToDouble(textBox16.Text) * 100);
+                    }
+                    catch
+                    {
+                        MessageBoxERRwarning(3);
+                        return;
+                    }
+                    break;
+                case 2:
+                    try
+                    {
+                        value = (short)(Convert.ToDouble(textBox15.Text) * 100);
+                    }
+                    catch
+                    {
+                        MessageBoxERRwarning(3);
+                        return;
+                    }
+                    break;
+                case 3:
+                    try
+                    {
+                        value = (short)(Convert.ToDouble(textBox14.Text) * 100);
+                    }
+                    catch
+                    {
+                        MessageBoxERRwarning(3);
+                        return;
+                    }
+                    break;
+                case 4:
+                    try
+                    {
+                        value = (short)(Convert.ToDouble(textBox13.Text) * 100);
+                    }
+                    catch
+                    {
+                        MessageBoxERRwarning(3);
+                        return;
+                    }
+                    break;
+                case 5:
+                    try
+                    {
+                        value = (short)(Convert.ToDouble(textBox12.Text) * 100);
+                    }
+                    catch
+                    {
+                        MessageBoxERRwarning(3);
+                        return;
+                    }
+                    break;
+                case 6:
+                    try
+                    {
+                        value = (short)(Convert.ToDouble(textBox11.Text) * 100);
+                    }
+                    catch
+                    {
+                        MessageBoxERRwarning(3);
+                        return;
+                    }
+                    break;
+                case 7:
+                    try
+                    {
+                        value = (short)(Convert.ToDouble(textBox10.Text) * 100);
+                    }
+                    catch
+                    {
+                        MessageBoxERRwarning(3);
+                        return;
+                    }
+                    break;
+                case 8:
+                    try
+                    {
+                        value = (short)(Convert.ToDouble(textBox9.Text) * 100);
+                    }
+                    catch
+                    {
+                        MessageBoxERRwarning(3);
+                        return;
+                    }
+                    break;
+                default:
+                    return;
+            }
+            TXBUFbytearray[5] = (byte)(value >> 8);
+            TXBUFbytearray[6] = (byte)value;
+            crc = GetCRC(TXBUFbytearray, (byte)(totallen - 2));
+            TXBUFbytearray[7] = (byte)crc;
+            TXBUFbytearray[8] = (byte)(crc >> 8);
+
+            SendData_New(TXBUFbytearray, 0, totallen);
+        }
+
+        public void PrepareData_New4()       //准备要发送的数据并发送
+        {
+            byte totallen = 0;
+            byte[] TXBUFbytearray;
+            uint crc = 0;
+            unrespond_cmd = 4;
+            totallen = 6;
+            TXBUFbytearray = new byte[6];
+            TXBUFbytearray[0] = 0x00;
+            TXBUFbytearray[1] = 0x00;
+            TXBUFbytearray[2] = 0x06;
+            TXBUFbytearray[3] = 0x08;
+            crc = GetCRC(TXBUFbytearray, (byte)(totallen - 2));
+            TXBUFbytearray[4] = (byte)crc;
+            TXBUFbytearray[5] = (byte)(crc >> 8);
+
+            SendData_New(TXBUFbytearray, 0, totallen);
+        }
+
+        public void PrepareData_New5()       //准备要发送的数据并发送
+        {
+            byte totallen = 0;
+            byte[] TXBUFbytearray;
+            uint crc = 0;
+            short value;
+            unrespond_cmd = 5;
+
+            if (TC_temperature_side == 1)
+            {
+                totallen = 22;
+                TXBUFbytearray = new byte[22];
+                TXBUFbytearray[0] = 0x01;
+                TXBUFbytearray[1] = 0x03;
+                TXBUFbytearray[2] = 0x16;
+                TXBUFbytearray[3] = 0x00;
+                try
+                {
+                    value = (short)(Convert.ToDouble(textBox42.Text) * 100);
+                    TXBUFbytearray[4] = (byte)(value >> 8);
+                    TXBUFbytearray[5] = (byte)value;
+                    value = (short)(Convert.ToDouble(textBox41.Text) * 100);
+                    TXBUFbytearray[6] = (byte)(value >> 8);
+                    TXBUFbytearray[7] = (byte)value;
+                    value = (short)(Convert.ToDouble(textBox40.Text) * 100);
+                    TXBUFbytearray[8] = (byte)(value >> 8);
+                    TXBUFbytearray[9] = (byte)value;
+                    value = (short)(Convert.ToDouble(textBox39.Text) * 100);
+                    TXBUFbytearray[10] = (byte)(value >> 8);
+                    TXBUFbytearray[11] = (byte)value;
+                    value = (short)(Convert.ToDouble(textBox38.Text) * 100);
+                    TXBUFbytearray[12] = (byte)(value >> 8);
+                    TXBUFbytearray[13] = (byte)value;
+                    value = (short)(Convert.ToDouble(textBox37.Text) * 100);
+                    TXBUFbytearray[14] = (byte)(value >> 8);
+                    TXBUFbytearray[15] = (byte)value;
+                    value = (short)(Convert.ToDouble(textBox36.Text) * 100);
+                    TXBUFbytearray[16] = (byte)(value >> 8);
+                    TXBUFbytearray[17] = (byte)value;
+                    value = (short)(Convert.ToDouble(textBox35.Text) * 100);
+                    TXBUFbytearray[18] = (byte)(value >> 8);
+                    TXBUFbytearray[19] = (byte)value;
+                }
+                catch
+                {
+                    MessageBoxERRwarning(3);
+                    return;
+                }
+                crc = GetCRC(TXBUFbytearray, (byte)(totallen - 2));
+                TXBUFbytearray[20] = (byte)crc;
+                TXBUFbytearray[21] = (byte)(crc >> 8);
+            }
+            else
+            {
+                totallen = 9;
+                TXBUFbytearray = new byte[9];
+                TXBUFbytearray[0] = 0x01;
+                TXBUFbytearray[1] = 0x03;
+                TXBUFbytearray[2] = 0x09;
+                TXBUFbytearray[3] = 0x01;
+                TXBUFbytearray[4] = channel_select_TC;
+                switch (channel_select_TC)
+                {
+                    case 1:
+                        try
+                        {
+                            value = (short)(Convert.ToDouble(textBox42.Text) * 100);
+                        }
+                        catch
+                        {
+                            MessageBoxERRwarning(3);
+                            return;
+                        }
+                        break;
+                    case 2:
+                        try
+                        {
+                            value = (short)(Convert.ToDouble(textBox41.Text) * 100);
+                        }
+                        catch
+                        {
+                            MessageBoxERRwarning(3);
+                            return;
+                        }
+                        break;
+                    case 3:
+                        try
+                        {
+                            value = (short)(Convert.ToDouble(textBox40.Text) * 100);
+                        }
+                        catch
+                        {
+                            MessageBoxERRwarning(3);
+                            return;
+                        }
+                        break;
+                    case 4:
+                        try
+                        {
+                            value = (short)(Convert.ToDouble(textBox39.Text) * 100);
+                        }
+                        catch
+                        {
+                            MessageBoxERRwarning(3);
+                            return;
+                        }
+                        break;
+                    case 5:
+                        try
+                        {
+                            value = (short)(Convert.ToDouble(textBox38.Text) * 100);
+                        }
+                        catch
+                        {
+                            MessageBoxERRwarning(3);
+                            return;
+                        }
+                        break;
+                    case 6:
+                        try
+                        {
+                            value = (short)(Convert.ToDouble(textBox37.Text) * 100);
+                        }
+                        catch
+                        {
+                            MessageBoxERRwarning(3);
+                            return;
+                        }
+                        break;
+                    case 7:
+                        try
+                        {
+                            value = (short)(Convert.ToDouble(textBox36.Text) * 100);
+                        }
+                        catch
+                        {
+                            MessageBoxERRwarning(3);
+                            return;
+                        }
+                        break;
+                    case 8:
+                        try
+                        {
+                            value = (short)(Convert.ToDouble(textBox35.Text) * 100);
+                        }
+                        catch
+                        {
+                            MessageBoxERRwarning(3);
+                            return;
+                        }
+                        break;
+                    default:
+                        return;
+                }
+                TXBUFbytearray[5] = (byte)(value >> 8);
+                TXBUFbytearray[6] = (byte)value;
+                crc = GetCRC(TXBUFbytearray, (byte)(totallen - 2));
+                TXBUFbytearray[7] = (byte)crc;
+                TXBUFbytearray[8] = (byte)(crc >> 8);
+            }
+            SendData_New(TXBUFbytearray, 0, totallen);
+        }
+
+        public void PrepareData_New6()       //准备要发送的数据并发送
+        {
+            byte totallen = 0;
+            byte[] TXBUFbytearray;
+            uint crc = 0;
+            short value;
+            unrespond_cmd = 6;
+
+            if (TC_temperature_side == 1)
+            {
+                totallen = 22;
+                TXBUFbytearray = new byte[22];
+                TXBUFbytearray[0] = 0x01;
+                TXBUFbytearray[1] = 0x03;
+                TXBUFbytearray[2] = 0x16;
+                TXBUFbytearray[3] = 0x00;
+                try
+                {
+                    value = (short)(Convert.ToDouble(textBox34.Text) * 100);
+                    TXBUFbytearray[4] = (byte)(value >> 8);
+                    TXBUFbytearray[5] = (byte)value;
+                    value = (short)(Convert.ToDouble(textBox33.Text) * 100);
+                    TXBUFbytearray[6] = (byte)(value >> 8);
+                    TXBUFbytearray[7] = (byte)value;
+                    value = (short)(Convert.ToDouble(textBox32.Text) * 100);
+                    TXBUFbytearray[8] = (byte)(value >> 8);
+                    TXBUFbytearray[9] = (byte)value;
+                    value = (short)(Convert.ToDouble(textBox31.Text) * 100);
+                    TXBUFbytearray[10] = (byte)(value >> 8);
+                    TXBUFbytearray[11] = (byte)value;
+                    value = (short)(Convert.ToDouble(textBox30.Text) * 100);
+                    TXBUFbytearray[12] = (byte)(value >> 8);
+                    TXBUFbytearray[13] = (byte)value;
+                    value = (short)(Convert.ToDouble(textBox29.Text) * 100);
+                    TXBUFbytearray[14] = (byte)(value >> 8);
+                    TXBUFbytearray[15] = (byte)value;
+                    value = (short)(Convert.ToDouble(textBox28.Text) * 100);
+                    TXBUFbytearray[16] = (byte)(value >> 8);
+                    TXBUFbytearray[17] = (byte)value;
+                    value = (short)(Convert.ToDouble(textBox27.Text) * 100);
+                    TXBUFbytearray[18] = (byte)(value >> 8);
+                    TXBUFbytearray[19] = (byte)value;
+                }
+                catch
+                {
+                    MessageBoxERRwarning(3);
+                    return;
+                }
+                crc = GetCRC(TXBUFbytearray, (byte)(totallen - 2));
+                TXBUFbytearray[20] = (byte)crc;
+                TXBUFbytearray[21] = (byte)(crc >> 8);
+            }
+            else
+            {
+                totallen = 9;
+                TXBUFbytearray = new byte[9];
+                TXBUFbytearray[0] = 0x01;
+                TXBUFbytearray[1] = 0x03;
+                TXBUFbytearray[2] = 0x09;
+                TXBUFbytearray[3] = 0x01;
+                TXBUFbytearray[4] = channel_select_TC;
+                switch (channel_select_TC)
+                {
+                    case 1:
+                        try
+                        {
+                            value = (short)(Convert.ToDouble(textBox34.Text) * 100);
+                        }
+                        catch
+                        {
+                            MessageBoxERRwarning(3);
+                            return;
+                        }
+                        break;
+                    case 2:
+                        try
+                        {
+                            value = (short)(Convert.ToDouble(textBox33.Text) * 100);
+                        }
+                        catch
+                        {
+                            MessageBoxERRwarning(3);
+                            return;
+                        }
+                        break;
+                    case 3:
+                        try
+                        {
+                            value = (short)(Convert.ToDouble(textBox32.Text) * 100);
+                        }
+                        catch
+                        {
+                            MessageBoxERRwarning(3);
+                            return;
+                        }
+                        break;
+                    case 4:
+                        try
+                        {
+                            value = (short)(Convert.ToDouble(textBox31.Text) * 100);
+                        }
+                        catch
+                        {
+                            MessageBoxERRwarning(3);
+                            return;
+                        }
+                        break;
+                    case 5:
+                        try
+                        {
+                            value = (short)(Convert.ToDouble(textBox30.Text) * 100);
+                        }
+                        catch
+                        {
+                            MessageBoxERRwarning(3);
+                            return;
+                        }
+                        break;
+                    case 6:
+                        try
+                        {
+                            value = (short)(Convert.ToDouble(textBox29.Text) * 100);
+                        }
+                        catch
+                        {
+                            MessageBoxERRwarning(3);
+                            return;
+                        }
+                        break;
+                    case 7:
+                        try
+                        {
+                            value = (short)(Convert.ToDouble(textBox28.Text) * 100);
+                        }
+                        catch
+                        {
+                            MessageBoxERRwarning(3);
+                            return;
+                        }
+                        break;
+                    case 8:
+                        try
+                        {
+                            value = (short)(Convert.ToDouble(textBox27.Text) * 100);
+                        }
+                        catch
+                        {
+                            MessageBoxERRwarning(3);
+                            return;
+                        }
+                        break;
+                    default:
+                        return;
+                }
+                TXBUFbytearray[5] = (byte)(value >> 8);
+                TXBUFbytearray[6] = (byte)value;
+                crc = GetCRC(TXBUFbytearray, (byte)(totallen - 2));
+                TXBUFbytearray[7] = (byte)crc;
+                TXBUFbytearray[8] = (byte)(crc >> 8);
+            }
+
+            SendData_New(TXBUFbytearray, 0, totallen);
+        }
+
+        public void PrepareData_New7()       //准备要发送的数据并发送
+        {
+            byte totallen = 0;
+            byte[] TXBUFbytearray;
+            uint crc = 0;
+            unrespond_cmd = 7;
+            totallen = 7;
+            TXBUFbytearray = new byte[7];
+            TXBUFbytearray[0] = 0x01;
+            TXBUFbytearray[1] = 0x01;
+            TXBUFbytearray[2] = 0x07;
+            TXBUFbytearray[3] = 0x0C;
+            if (comboBox1.Text == "内置冷端")
+            {
+                TXBUFbytearray[4] = 0x00;
+                radioButton10.Enabled = false;
+                radioButton18.Visible = false;
+                radioButton17.Visible = false;
+                radioButton16.Visible = false;
+                radioButton15.Visible = false;
+                radioButton14.Visible = false;
+                radioButton13.Visible = false;
+                radioButton12.Visible = false;
+                radioButton11.Visible = false;
+            }
+            else if (comboBox1.Text == "外置冷端")
+            {
+                TXBUFbytearray[4] = 0x01;
+                radioButton10.Enabled = true;
+            }
+            else if (comboBox1.Text == "冰点冷端")
+            {
+                TXBUFbytearray[4] = 0x02;
+                radioButton10.Enabled = false;
+                radioButton18.Visible = false;
+                radioButton17.Visible = false;
+                radioButton16.Visible = false;
+                radioButton15.Visible = false;
+                radioButton14.Visible = false;
+                radioButton13.Visible = false;
+                radioButton12.Visible = false;
+                radioButton11.Visible = false;
+            }
+            else
+            {
+                MessageBoxERRwarning(5);
+                return;
+            }
+            crc = GetCRC(TXBUFbytearray, (byte)(totallen - 2));
+            TXBUFbytearray[5] = (byte)crc;
+            TXBUFbytearray[6] = (byte)(crc >> 8);
+
+            SendData_New(TXBUFbytearray, 0, totallen);
+        }
+
+        public void PrepareData_New8()       //准备要发送的数据并发送
+        {
+            byte totallen = 0;
+            byte[] TXBUFbytearray;
+            uint crc = 0;
+            unrespond_cmd = 8;
+            totallen = 6;
+            TXBUFbytearray = new byte[6];
+            TXBUFbytearray[0] = 0x00;
+            TXBUFbytearray[1] = 0x00;
+            TXBUFbytearray[2] = 0x06;
+            TXBUFbytearray[3] = 0x08;
+            crc = GetCRC(TXBUFbytearray, (byte)(totallen - 2));
+            TXBUFbytearray[4] = (byte)crc;
+            TXBUFbytearray[5] = (byte)(crc >> 8);
+
+            SendData_New(TXBUFbytearray, 0, totallen);
+        }
+
+        public uint GetCRC(byte[] crc_array, byte len)
+        {
+            uint i, j;
+            uint modbus_crc;
+            modbus_crc = 0xffff;
+            for (i = 0; i < len; i++)
+            {
+                modbus_crc = (modbus_crc & 0xFF00) | ((modbus_crc & 0x00FF) ^ crc_array[i]);
+                for (j = 1; j <= 8; j++)
+                {
+                    if ((modbus_crc & 0x01) == 1)
+                    {
+                        modbus_crc = (modbus_crc >> 1);
+                        modbus_crc ^= 0XA001;
+                    }
+                    else
+                    {
+                        modbus_crc = (modbus_crc >> 1);
+                    }
+                }
+            }
+            return modbus_crc;
+        }
+
+        public bool GetRespond(byte cmd)
+        {
+            string showword = "应答失败";
+            Thread.Sleep(500);
+            if (unrespond_cmd == 0)
+            {
+                switch (cmd)
+                {
+                    case 1:
+                        showword = "PT校准功能启动成功";
+                        break;
+                    case 2:
+                        showword = "第一点校准成功";
+                        break;
+                    case 3:
+                        showword = "第二点校准成功";
+                        break;
+                    case 4:
+                        showword = "获得采集结果成功";
+                        break;
+                    case 5:
+                        showword = "八路通道第一点校准成功";
+                        break;
+                    case 6:
+                        showword = "八路通道第二点校准成功";
+                        break;
+                    case 7:
+                        showword = "TC校准功能启动成功";
+                        break;
+                    case 8:
+                        showword = "获得采集结果成功";
+                        break;
+                    default:
+                        break;
+                }
+                MessageBox.Show(showword);
+                return true;
+            }
+            unrespond_cmd = 0;
+            MessageBox.Show(showword);
+            return false;
+        }
+
+    }
+}
+
+

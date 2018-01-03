@@ -1,0 +1,72 @@
+E:\YX\PROJ\8PT TC\上位机\Test_OMCO_soft\Test_OMCO_soft\bin\Release\Testsoft.exe.config
+E:\YX\PROJ\8PT TC\上位机\Test_OMCO_soft\Test_OMCO_soft\obj\x86\Release\Test_OMCO_soft.csproj.ResolveComReference.cache
+E:\YX\PROJ\8PT TC\上位机\Test_OMCO_soft\Test_OMCO_soft\bin\Release\Testsoft.exe
+E:\YX\PROJ\8PT TC\上位机\Test_OMCO_soft\Test_OMCO_soft\bin\Release\Testsoft.pdb
+E:\YX\PROJ\8PT TC\上位机\Test_OMCO_soft\Test_OMCO_soft\bin\Release\Aspose.Cells.dll
+E:\YX\PROJ\8PT TC\上位机\Test_OMCO_soft\Test_OMCO_soft\bin\Release\NPOI.dll
+E:\YX\PROJ\8PT TC\上位机\Test_OMCO_soft\Test_OMCO_soft\obj\x86\Release\Test_OMCO_soft.csprojResolveAssemblyReference.cache
+E:\YX\PROJ\8PT TC\上位机\Test_OMCO_soft\Test_OMCO_soft\obj\x86\Release\Testsoft.Form1.resources
+E:\YX\PROJ\8PT TC\上位机\Test_OMCO_soft\Test_OMCO_soft\obj\x86\Release\Testsoft.Properties.Resources.resources
+E:\YX\PROJ\8PT TC\上位机\Test_OMCO_soft\Test_OMCO_soft\obj\x86\Release\Test_OMCO_soft.csproj.GenerateResource.Cache
+E:\YX\PROJ\8PT TC\上位机\Test_OMCO_soft\Test_OMCO_soft\obj\x86\Release\Testsoft.exe
+E:\YX\PROJ\8PT TC\上位机\Test_OMCO_soft\Test_OMCO_soft\obj\x86\Release\Testsoft.pdb
+E:\YX\PROJ\8PT TC\上位机\8路PT_TC采集板校准工具 代码\Test_OMCO_soft\bin\Release\Testsoft.exe.config
+E:\YX\PROJ\8PT TC\上位机\8路PT_TC采集板校准工具 代码\Test_OMCO_soft\obj\x86\Release\Test_OMCO_soft.csproj.ResolveComReference.cache
+E:\YX\PROJ\8PT TC\上位机\8路PT_TC采集板校准工具 代码\Test_OMCO_soft\obj\x86\Release\Testsoft.exe
+E:\YX\PROJ\8PT TC\上位机\8路PT_TC采集板校准工具 代码\Test_OMCO_soft\obj\x86\Release\Testsoft.pdb
+E:\YX\PROJ\8PT TC\上位机\8路PT_TC采集板校准工具 代码\Test_OMCO_soft\bin\Release\Testsoft.exe
+E:\YX\PROJ\8PT TC\上位机\8路PT_TC采集板校准工具 代码\Test_OMCO_soft\bin\Release\Testsoft.pdb
+E:\YX\PROJ\8PT TC\上位机\8路PT_TC采集板校准工具 代码\Test_OMCO_soft\bin\Release\Aspose.Cells.dll
+E:\YX\PROJ\8PT TC\上位机\8路PT_TC采集板校准工具 代码\Test_OMCO_soft\bin\Release\NPOI.dll
+E:\YX\PROJ\8PT TC\上位机\8路PT_TC采集板校准工具 代码\Test_OMCO_soft\obj\x86\Release\Test_OMCO_soft.csprojResolveAssemblyReference.cache
+E:\YX\PROJ\8PT TC\上位机\8路PT_TC采集板校准工具 代码\Test_OMCO_soft\obj\x86\Release\Testsoft.Form1.resources
+E:\YX\PROJ\8PT TC\上位机\8路PT_TC采集板校准工具 代码\Test_OMCO_soft\obj\x86\Release\Testsoft.Properties.Resources.resources
+E:\YX\PROJ\8PT TC\上位机\8路PT_TC采集板校准工具 代码\Test_OMCO_soft\obj\x86\Release\Test_OMCO_soft.csproj.GenerateResource.Cache
+E:\YX\PROJ\8PT TC\上位机\扩展模块工装工具 代码\Test_OMCO_soft\bin\Release\Testsoft.exe.config
+E:\YX\PROJ\8PT TC\上位机\扩展模块工装工具 代码\Test_OMCO_soft\obj\x86\Release\Test_OMCO_soft.csproj.ResolveComReference.cache
+E:\YX\PROJ\8PT TC\上位机\扩展模块工装工具 代码\Test_OMCO_soft\obj\x86\Release\Testsoft.exe
+E:\YX\PROJ\8PT TC\上位机\扩展模块工装工具 代码\Test_OMCO_soft\obj\x86\Release\Testsoft.pdb
+E:\YX\PROJ\8PT TC\上位机\扩展模块工装工具 代码\Test_OMCO_soft\bin\Release\Testsoft.exe
+E:\YX\PROJ\8PT TC\上位机\扩展模块工装工具 代码\Test_OMCO_soft\bin\Release\Testsoft.pdb
+E:\YX\PROJ\8PT TC\上位机\扩展模块工装工具 代码\Test_OMCO_soft\bin\Release\Aspose.Cells.dll
+E:\YX\PROJ\8PT TC\上位机\扩展模块工装工具 代码\Test_OMCO_soft\bin\Release\NPOI.dll
+E:\YX\PROJ\8PT TC\上位机\扩展模块工装工具 代码\Test_OMCO_soft\obj\x86\Release\Test_OMCO_soft.csprojResolveAssemblyReference.cache
+E:\YX\PROJ\8PT TC\上位机\扩展模块工装工具 代码\Test_OMCO_soft\obj\x86\Release\Testsoft.Form1.resources
+E:\YX\PROJ\8PT TC\上位机\扩展模块工装工具 代码\Test_OMCO_soft\obj\x86\Release\Testsoft.Properties.Resources.resources
+E:\YX\PROJ\8PT TC\上位机\扩展模块工装工具 代码\Test_OMCO_soft\obj\x86\Release\Test_OMCO_soft.csproj.GenerateResource.Cache
+E:\YX\PROJ\工装\上位机\扩展模块工装工具 代码\Test_OMCO_soft\bin\Release\Testsoft.exe.config
+E:\YX\PROJ\工装\上位机\扩展模块工装工具 代码\Test_OMCO_soft\obj\x86\Release\Test_OMCO_soft.csproj.ResolveComReference.cache
+E:\YX\PROJ\工装\上位机\扩展模块工装工具 代码\Test_OMCO_soft\obj\x86\Release\Testsoft.exe
+E:\YX\PROJ\工装\上位机\扩展模块工装工具 代码\Test_OMCO_soft\obj\x86\Release\Testsoft.pdb
+E:\YX\PROJ\工装\上位机\扩展模块工装工具 代码\Test_OMCO_soft\bin\Release\Testsoft.exe
+E:\YX\PROJ\工装\上位机\扩展模块工装工具 代码\Test_OMCO_soft\bin\Release\Testsoft.pdb
+E:\YX\PROJ\工装\上位机\扩展模块工装工具 代码\Test_OMCO_soft\bin\Release\Aspose.Cells.dll
+E:\YX\PROJ\工装\上位机\扩展模块工装工具 代码\Test_OMCO_soft\bin\Release\NPOI.dll
+E:\YX\PROJ\工装\上位机\扩展模块工装工具 代码\Test_OMCO_soft\obj\x86\Release\Test_OMCO_soft.csprojResolveAssemblyReference.cache
+E:\YX\PROJ\工装\上位机\扩展模块工装工具 代码\Test_OMCO_soft\obj\x86\Release\Testsoft.Form1.resources
+E:\YX\PROJ\工装\上位机\扩展模块工装工具 代码\Test_OMCO_soft\obj\x86\Release\Testsoft.Properties.Resources.resources
+E:\YX\PROJ\工装\上位机\扩展模块工装工具 代码\Test_OMCO_soft\obj\x86\Release\Test_OMCO_soft.csproj.GenerateResource.Cache
+E:\YX\PROJ\工装\上位机\PLC工装平台工具 代码\Test_OMCO_soft\bin\Release\Testsoft.exe.config
+E:\YX\PROJ\工装\上位机\PLC工装平台工具 代码\Test_OMCO_soft\obj\x86\Release\Test_OMCO_soft.csproj.ResolveComReference.cache
+E:\YX\PROJ\工装\上位机\PLC工装平台工具 代码\Test_OMCO_soft\obj\x86\Release\Testsoft.exe
+E:\YX\PROJ\工装\上位机\PLC工装平台工具 代码\Test_OMCO_soft\obj\x86\Release\Testsoft.pdb
+E:\YX\PROJ\工装\上位机\PLC工装平台工具 代码\Test_OMCO_soft\bin\Release\Testsoft.exe
+E:\YX\PROJ\工装\上位机\PLC工装平台工具 代码\Test_OMCO_soft\bin\Release\Testsoft.pdb
+E:\YX\PROJ\工装\上位机\PLC工装平台工具 代码\Test_OMCO_soft\bin\Release\Aspose.Cells.dll
+E:\YX\PROJ\工装\上位机\PLC工装平台工具 代码\Test_OMCO_soft\bin\Release\NPOI.dll
+E:\YX\PROJ\工装\上位机\PLC工装平台工具 代码\Test_OMCO_soft\obj\x86\Release\Test_OMCO_soft.csprojResolveAssemblyReference.cache
+E:\YX\PROJ\工装\上位机\PLC工装平台工具 代码\Test_OMCO_soft\obj\x86\Release\Testsoft.Form1.resources
+E:\YX\PROJ\工装\上位机\PLC工装平台工具 代码\Test_OMCO_soft\obj\x86\Release\Testsoft.Properties.Resources.resources
+E:\YX\PROJ\工装\上位机\PLC工装平台工具 代码\Test_OMCO_soft\obj\x86\Release\Test_OMCO_soft.csproj.GenerateResource.Cache
+E:\YX\PROJ\工装\上位机\PLC工装平台工具 上位机代码\Test_OMCO_soft\bin\Release\Testsoft.exe.config
+E:\YX\PROJ\工装\上位机\PLC工装平台工具 上位机代码\Test_OMCO_soft\obj\x86\Release\Test_OMCO_soft.csproj.ResolveComReference.cache
+E:\YX\PROJ\工装\上位机\PLC工装平台工具 上位机代码\Test_OMCO_soft\obj\x86\Release\Testsoft.exe
+E:\YX\PROJ\工装\上位机\PLC工装平台工具 上位机代码\Test_OMCO_soft\obj\x86\Release\Testsoft.pdb
+E:\YX\PROJ\工装\上位机\PLC工装平台工具 上位机代码\Test_OMCO_soft\bin\Release\Testsoft.exe
+E:\YX\PROJ\工装\上位机\PLC工装平台工具 上位机代码\Test_OMCO_soft\bin\Release\Testsoft.pdb
+E:\YX\PROJ\工装\上位机\PLC工装平台工具 上位机代码\Test_OMCO_soft\bin\Release\Aspose.Cells.dll
+E:\YX\PROJ\工装\上位机\PLC工装平台工具 上位机代码\Test_OMCO_soft\bin\Release\NPOI.dll
+E:\YX\PROJ\工装\上位机\PLC工装平台工具 上位机代码\Test_OMCO_soft\obj\x86\Release\Test_OMCO_soft.csprojResolveAssemblyReference.cache
+E:\YX\PROJ\工装\上位机\PLC工装平台工具 上位机代码\Test_OMCO_soft\obj\x86\Release\Testsoft.Form1.resources
+E:\YX\PROJ\工装\上位机\PLC工装平台工具 上位机代码\Test_OMCO_soft\obj\x86\Release\Testsoft.Properties.Resources.resources
+E:\YX\PROJ\工装\上位机\PLC工装平台工具 上位机代码\Test_OMCO_soft\obj\x86\Release\Test_OMCO_soft.csproj.GenerateResource.Cache
